@@ -151,8 +151,8 @@ class NestedScrollViewSamplePage extends StatelessWidget {
                         SliverAppBar(
                           pinned: true,
                           expandedHeight: 200,
-                          flexibleSpace: Image.network(
-                              "https://www.sciencealert.com/images/2020-04/processed/earthmovement_1024.jpg"),
+                          flexibleSpace:
+                              Image.asset("assets/images/earthmovement.jpg"),
                         ),
                         // SliverOverlapInjector(
                         //   handle:
