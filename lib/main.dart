@@ -31,7 +31,7 @@ class StickyTabsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(_appBarTitle), elevation: 0.0),
+      // appBar: AppBar(title: const Text(_appBarTitle), elevation: 0.0),
       body: DefaultTabController(
         length: _tabs.length, // This is the number of tabs.
         child: NestedScrollView(
@@ -143,19 +143,23 @@ class NestedScrollViewSamplePage extends StatelessWidget {
           body: TabBarView(
             children: _tabs.map((String name) {
               return SafeArea(
-                top: false,
-                bottom: false,
                 child: Builder(
                   builder: (BuildContext context) {
                     return CustomScrollView(
                       key: PageStorageKey<String>(name),
                       slivers: <Widget>[
-                        SliverOverlapInjector(
-                          handle:
-                              NestedScrollView.sliverOverlapAbsorberHandleFor(
-                            context,
-                          ),
+                        SliverAppBar(
+                          pinned: true,
+                          expandedHeight: 200,
+                          flexibleSpace: Image.network(
+                              "https://www.sciencealert.com/images/2020-04/processed/earthmovement_1024.jpg"),
                         ),
+                        // SliverOverlapInjector(
+                        //   handle:
+                        //       NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        //     context,
+                        //   ),
+                        // ),
                         SliverPadding(
                           padding: const EdgeInsets.all(8.0),
                           sliver: SliverFixedExtentList(
