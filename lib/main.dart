@@ -133,6 +133,7 @@ class NestedScrollViewSamplePage extends StatelessWidget {
                   pinned: true,
                   expandedHeight: 150.0,
                   forceElevated: innerBoxIsScrolled,
+                  flexibleSpace: Image.asset("images/earthmovement.jpg"),
                   bottom: TabBar(
                     tabs: _tabs.map((String name) => Tab(text: name)).toList(),
                   ),
@@ -148,18 +149,18 @@ class NestedScrollViewSamplePage extends StatelessWidget {
                     return CustomScrollView(
                       key: PageStorageKey<String>(name),
                       slivers: <Widget>[
-                        SliverAppBar(
-                          pinned: true,
-                          expandedHeight: 200,
-                          flexibleSpace:
-                              Image.asset("assets/images/earthmovement.jpg"),
-                        ),
-                        // SliverOverlapInjector(
-                        //   handle:
-                        //       NestedScrollView.sliverOverlapAbsorberHandleFor(
-                        //     context,
-                        //   ),
+                        // SliverAppBar(
+                        //   pinned: true,
+                        //   expandedHeight: 200,
+                        //   flexibleSpace:
+                        //       Image.asset("images/earthmovement.jpg"),
                         // ),
+                        SliverOverlapInjector(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                            context,
+                          ),
+                        ),
                         SliverPadding(
                           padding: const EdgeInsets.all(8.0),
                           sliver: SliverFixedExtentList(
