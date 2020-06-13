@@ -1,117 +1,184 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const StickyTabsPage(),
+//      home: const NestedScrollViewSamplePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+const _tabs = [
+  'Apple',
+  'Banana',
+  'Cherry',
+];
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+const String _appBarTitle = 'Fruits';
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+/// Sticky TabBarを実現するページ
+class StickyTabsPage extends StatelessWidget {
+  const StickyTabsPage();
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      appBar: AppBar(title: const Text(_appBarTitle), elevation: 0.0),
+      body: DefaultTabController(
+        length: _tabs.length, // This is the number of tabs.
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Container(
+                      color: Colors.grey,
+                      height: 220.0,
+                      child: Center(
+                        child: const Text(
+                          'Header',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickyTabBarDelegate(
+                  TabBar(
+                    tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                  ),
+                ),
+              ),
+            ];
+          },
+          body: TabBarView(
+            children: _tabs.map((String name) {
+              return SafeArea(
+                child: ListView.builder(
+                  key: PageStorageKey(name),
+                  itemCount: 30,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text('Item $index'),
+                    );
+                  },
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  const _StickyTabBarDelegate(this.tabBar);
+
+  final TabBar tabBar;
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(color: Colors.blue, child: tabBar);
+  }
+
+  @override
+  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
+    return tabBar != oldDelegate.tabBar;
+  }
+}
+
+/// [NestedScrollView]のサンプルコードをそのまま突っ込んだページ
+class NestedScrollViewSamplePage extends StatelessWidget {
+  const NestedScrollViewSamplePage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: DefaultTabController(
+        length: _tabs.length,
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverOverlapAbsorber(
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverAppBar(
+                  title: const Text(_appBarTitle),
+                  pinned: true,
+                  expandedHeight: 150.0,
+                  forceElevated: innerBoxIsScrolled,
+                  bottom: TabBar(
+                    tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                  ),
+                ),
+              ),
+            ];
+          },
+          body: TabBarView(
+            children: _tabs.map((String name) {
+              return SafeArea(
+                top: false,
+                bottom: false,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return CustomScrollView(
+                      key: PageStorageKey<String>(name),
+                      slivers: <Widget>[
+                        SliverOverlapInjector(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                            context,
+                          ),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.all(8.0),
+                          sliver: SliverFixedExtentList(
+                            itemExtent: 48.0,
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                return ListTile(
+                                  title: Text('Item $index'),
+                                );
+                              },
+                              childCount: 30,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
     );
   }
 }
